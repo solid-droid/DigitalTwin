@@ -6,19 +6,23 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "run-ios":"npx cap run ios",
+    "run-android":"npx cap run android",
+    "build-ios":"npm run build && npm run run-ios",
+    "build-android":"npm run build && npm run run-android"
   },
   "license": "MIT",
   "devDependencies": {
     "@capacitor/cli": "^3.4.1",
-    "typescript": "^4.6.2",
-    "vite": "^2.8.6",
-    "vite-plugin-solid": "^2.2.6"
+    "typescript": "^4.7.4",
+    "vite": "^3.0.0",
+    "vite-plugin-solid": "^2.3.0"
   },
   "dependencies": {
     "@capacitor/android": "^3.4.1",
     "@capacitor/core": "^3.4.1",
     "@capacitor/ios": "^3.4.1",
-    "solid-js": "^1.3.12"
+    "solid-js": "^1.4.7"
   }
 }
