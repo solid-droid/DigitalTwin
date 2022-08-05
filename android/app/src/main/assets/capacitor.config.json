@@ -1,6 +1,6 @@
 {
 	"appId": "com.example.app",
-	"appName": "capacitor-solid-template",
+	"appName": "Digital Twin",
 	"webDir": "dist",
 	"bundledWebRuntime": false
 }

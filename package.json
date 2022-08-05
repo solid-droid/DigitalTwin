@@ -1,23 +1,23 @@
 {
-  "name": "capacitor-solid-template",
+  "name": "Digital Twin",
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "run-ios":"npx cap run ios",
-    "run-android":"npx cap run android",
-    "build-ios":"npm run build && npm run run-ios",
-    "build-android":"npm run build && npm run run-android"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "run-ios": "npx cap run ios",
+    "run-android": "npx cap run android",
+    "build-ios": "npm run build && npm run run-ios",
+    "build-android": "npm run build && npm run run-android"
   },
   "license": "MIT",
   "devDependencies": {
+    "@astrojs/solid-js": "^0.4.1",
     "@capacitor/cli": "^3.4.1",
-    "typescript": "^4.7.4",
-    "vite": "^3.0.0",
-    "vite-plugin-solid": "^2.3.0"
+    "astro": "^1.0.0-rc.6",
+    "typescript": "^4.7.4"
   },
   "dependencies": {
     "@capacitor/android": "^3.4.1",
