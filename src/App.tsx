@@ -1,13 +1,9 @@
-import type { Component } from 'solid-js';
-
-import logo from './logo.svg';
-import styles from './App.module.css';
+import { Component } from 'solid-js';
+import Layer3D from './screens/layer3D';
 
 const App: Component = () => {
   return (
-    <div class={styles.App}>
-      hello
-    </div>
+    <Layer3D></Layer3D>
   );
 };
 
