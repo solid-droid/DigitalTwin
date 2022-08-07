@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
-import * as Stats from 'stats.js';
+import Stats from 'stats.js';
 
 export class Simple3D {
 
@@ -531,4 +531,4 @@ class DomEvents{
         delete this.eventList[event][object.uuid];
         this.UUIDList[event] = Object.keys(this.eventList[event]);
     }
-  }
+}
