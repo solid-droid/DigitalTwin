@@ -3,7 +3,7 @@ import { GridMaterial } from '@babylonjs/materials/Grid';
 import Stats from 'stats.js';
 
 
-class utils {
+export class utils {
 	/**********Functions to Rotate and Scale based on a Pivot***************/
 	static rotateAroundPivot = (mesh:any , pivotPoint:any, axis:any, angle:any) => {
 		if(!mesh._rotationQuaternion) {
@@ -27,10 +27,9 @@ class utils {
 		mesh.position = new BABYLON.Vector3(pivotPoint.x + _sx * (mesh.position.x - pivotPoint.x), pivotPoint.y + _sy * (mesh.position.y - pivotPoint.y), pivotPoint.z + _sz * (mesh.position.z - pivotPoint.z));
 	}
 	/**********************************************************************/
+}
 
-    }
-
-export class Simple3D  {
+export class Simple3D {
     canvasID: string;
     canvas: HTMLCanvasElement;
     engine: BABYLON.Engine;
@@ -40,7 +39,10 @@ export class Simple3D  {
     stats: any;
     pipeline: any;
     localAxes: any;
-
+    
+    static yAxis = new BABYLON.Vector3(0, 1, 0);
+    static xAxis = new BABYLON.Vector3(1, 0, 0);
+    static zAxis = new BABYLON.Vector3(0, 0, 1);
     constructor(canvasID: string) {
         this.canvasID = canvasID;
         this.canvas = document.getElementById(this.canvasID) as HTMLCanvasElement;
@@ -196,13 +198,26 @@ export class ground2D {
             this.mesh.rotation.z = z;
             return this;
         },
-        grid : (show: boolean = true) => {
+        grid : (show: boolean = true, params:{
+            lineColor:string, 
+            mainColor:string,
+            opacity:number,
+        } = {
+            lineColor: '#ffffff', 
+            mainColor: '#000000',
+            opacity: 0.4,
+        }) => {
             if(show){
                 this.material = new GridMaterial("groundMaterial", this.scene);
                 this.material.gridRatio = 0.01;
-                this.material.mainColor = new BABYLON.Color3(1, 1, 1);
-                this.material.lineColor = new BABYLON.Color3(1.0, 1.0, 1.0);
-                this.material.opacity = 0.2;
+                this.material.minorUnitVisibility = 0.7;
+                this.material.majorUnitFrequency  = 10;
+                this.material.useMaxLine=true;
+
+                this.material.mainColor = BABYLON.Color4.FromHexString(params.mainColor);
+                this.material.lineColor = BABYLON.Color4.FromHexString(params.lineColor);
+                this.material.opacity = params.opacity;
+
                 this.material.backFaceCulling = false;
                 this.mesh.material = this.material;
             } else {
@@ -241,16 +256,97 @@ export class box3D {
 
     #name: string = this.type;
     #color: string = '#ffffff';
+    #x: number = 0;
+    #y: number = 0;
+    #z: number = 0;
     
     #showEdge: boolean = false;
     #edgeColor: string = '#bcbec299';
     #edgeWidth: number = 1;
 
+    #origin:'center'|'corner' = 'corner';
+    ////////////////////////////////
+    test(){
+        this.x = 1;
+    }
+    get x() { return this.#x};
+    get y() { return this.#y};
+    get z() { return this.#z};
+    set x(x: number) { 
+        this.#x = x;
+        if(this.origin === 'center'){
+            this.mesh.position.x = x;
+        } else {
+            this.mesh.position.x = x + this.mesh.scaling.x / 2;
+        }
+    }
+    set y(y: number) {
+        this.#y = y;
+        if(this.origin === 'center'){
+            this.mesh.position.y = y;
+        } else {
+            this.mesh.position.y = y + this.mesh.scaling.y / 2;
+        }
+    }
+    set z(z: number) {
+        this.#z = z;
+        if(this.origin === 'center'){
+            this.mesh.position.z = z;
+        } else {
+            this.mesh.position.z = z + this.mesh.scaling.z / 2;
+        }
+    }
+    /////////////////////////////////
+    get width() { return this.mesh.scaling.x};
+    get height() { return this.mesh.scaling.y};
+    get depth() { return this.mesh.scaling.z};
+    set width(width: number) { 
+        if(this.origin === 'center'){
+            this.mesh.scaling.x = width;
+        } else {
+            const pivotAt = this.get.corner();
+            utils.scaleFromPivot(this.mesh, pivotAt, width, this.height, this.depth);
+        }
+    };
+    set height(height: number) {
+        if(this.origin === 'center'){
+            this.mesh.scaling.y = height;
+        } else {
+            const pivotAt = this.get.corner();
+            utils.scaleFromPivot(this.mesh, pivotAt, this.width, height, this.depth);
+        }
+    };
+    set depth(depth: number) {
+        if(this.origin === 'center'){
+            this.mesh.scaling.z = depth;
+        } else {
+            const pivotAt = this.get.corner();
+            utils.scaleFromPivot(this.mesh, pivotAt, this.width, this.height, depth);
+        }
+    };
+    ////////////////////////////////
+    get origin() {
+        return this.#origin;
+    }
+
+    set origin(origin: 'center' | 'corner') {
+        this.#origin = origin;
+    }
+
+    //////////////////////////////////
+
+    get opacity() {
+        return this.material.alpha;
+    }
+    set opacity(opacity: number) {
+        this.material.alpha = opacity;
+    }
+
+
     get = {
-        x: () => this.mesh.position.x,
-        y: () => this.mesh.position.y,
-        z: () => this.mesh.position.z,
-        position: () => this.mesh.position,
+        x: () => this.#x,
+        y: () => this.#y,
+        z: () => this.#z,
         width: () => this.mesh.scaling.x,
         height: () => this.mesh.scaling.y,
         depth: () => this.mesh.scaling.z,
@@ -260,33 +356,41 @@ export class box3D {
         showEdge: () => this.#showEdge,
         edgeColor: () => this.#edgeColor,
         edgeWidth: () => this.#edgeWidth,
+        corner: ():BABYLON.Vector3 => {
+            return new BABYLON.Vector3(
+                this.mesh.position.x - this.mesh.scaling.x / 2, 
+                this.mesh.position.y - this.mesh.scaling.y / 2,
+                this.mesh.position.z - this.mesh.scaling.z / 2);
+        },
+        center: ():BABYLON.Vector3 => {
+            return new BABYLON.Vector3(
+                this.mesh.position.x, 
+                this.mesh.position.y,
+                this.mesh.position.z);
+        }
     }
 
     set = {
-        x: (x: number) => {
-            this.mesh.position.x = x
+        x: (x: number) => { 
+            this.x = x; 
             return this;
         },
         y: (y: number) => {
-            this.mesh.position.y = y
+            this.y = y;
             return this;
         } ,
         z: (z: number) => {
-            this.mesh.position.z = z
+            this.z = z;
             return this;
         } ,
-        width: (width: number) => {
-            this.mesh.scaling.x = width
+        pivotRotate: (pivot:BABYLON.Vector3, axis:BABYLON.Vector3, angle:number ) => {
+            utils.rotateAroundPivot(this.mesh, pivot, axis, angle);
             return this;
-        } ,
-        height: (height: number) => {
-            this.mesh.scaling.y = height
+        },
+        rotation:(axis:BABYLON.Vector3, angle:number , space:any =BABYLON.Space.LOCAL)=> {
+            this.mesh.rotate(axis, angle, space);
             return this;
-        } ,
-        depth: (depth: number) => {
-            this.mesh.scaling.z = depth
-            return this;
-        } ,
+        },
         position: (x: number, y: number, z: number) => {
             this.mesh.position.x = x;
             this.mesh.position.y = y;
@@ -311,25 +415,19 @@ export class box3D {
             }
             return this;
         },
-        scaleFromCenter:(width: number=1, height: number=1, depth: number=1) => {
-            this.mesh.scaling.y = height;
-            this.mesh.scaling.x = width;
-            this.mesh.scaling.z = depth;
+        origin: (origin: 'center' | 'corner') => {
+            this.#origin = origin;
             return this;
         },
-        boundingBox: (show:boolean=true) => {
-            if(show){
-                this.mesh.showBoundingBox = true;
-            } else {
-                this.mesh.showBoundingBox = false;
-            }
-        },
         scale: (width: number=1, height: number=1, depth: number=1) => {
-            let pivotAt = new BABYLON.Vector3(
-                this.mesh.position.x - this.mesh.scaling.x / 2, 
-                this.mesh.position.y - this.mesh.scaling.y / 2,
-                this.mesh.position.z - this.mesh.scaling.z / 2);
-            utils.scaleFromPivot(this.mesh, pivotAt, width, height, depth);
+            if(this.#origin === 'corner'){
+                const pivotAt = this.get.corner();
+                utils.scaleFromPivot(this.mesh, pivotAt, width, height, depth);
+            } else {
+                this.mesh.scaling.y = height;
+                this.mesh.scaling.x = width;
+                this.mesh.scaling.z = depth;
+            }
             return this; 
         }
 

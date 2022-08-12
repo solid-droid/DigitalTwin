@@ -1,7 +1,7 @@
 import { Component, onMount } from 'solid-js';
-import { Simple3D, box3D, ground2D } from '../components/BabylonJS/Simple3D';
+import { Simple3D, box3D, ground2D, utils } from '../components/BabylonJS/Simple3D';
 import * as TWEEN from '@tweenjs/tween.js';
-
+import { Vector3 } from '@babylonjs/core';
 const Layer3D: Component = () => {
 
     onMount(() => {
@@ -12,23 +12,32 @@ const Layer3D: Component = () => {
 
         box.set.edge(true)
            .set.opacity(0.5)
+           .set.x(4)
+           .set.z(4)
 
         box2.set.edge(true)
             .set.opacity(1)
 
         ground.set.scale(10, 10)
               .set.grid()
-        
-        new TWEEN.Tween({x:box.mesh.scaling.x})
-        .to({x:3}, 1000)
-        .repeat(Infinity)
-        .yoyo(true)
-        .onUpdate(({x}) => {
-            box.set.scale(x, 1, 1);
-        })
-        .start();
+              
+        new TWEEN.Tween(box)
+                 .to({
+                  height:3,
+                }, 1000)
+                 .repeat(Infinity)
+                 .yoyo(true)
+                 .onUpdate(({height}) => {
+                  utils.rotateAroundPivot(
+                    box.mesh, 
+                    new Vector3(0.5, 0, 0.5), 
+                    new Vector3(0, 1, 0), 
+                    height*0.01
+                    )
+                })
+                 .start();
              
-
+        box.test();
         scene.showStats()
              .showAxis()
              .render([TWEEN.update]);      
